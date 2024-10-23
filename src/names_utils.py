@@ -113,9 +113,13 @@ def complement_taxonomy_gbif_id(path):
             for i, line in enumerate(tax):
                 data = json.loads(line)
                 print(f'Working on {i}. {data["species"]}')
-                data['gbif_usageKey'] = gbif_spp.name_backbone(data['species'])['usageKey']
-                data['gbif_scientificName'] = gbif_spp.name_backbone(data['species'])['scientificName']
-                data['gbif_status'] = gbif_spp.name_backbone(data['species'])['status']
-                data['gbif_confidence'] = gbif_spp.name_backbone(data['species'])['confidence']
-                data['gbif_matchType'] = gbif_spp.name_backbone(data['species'])['matchType']
+                gbif_record = gbif_spp.name_backbone(
+                    name=data['species'],
+                    family=data['family']
+                )
+                data['gbif_usageKey'] = gbif_record['usageKey']
+                data['gbif_scientificName'] = gbif_record['scientificName']
+                data['gbif_status'] = gbif_record['status']
+                data['gbif_confidence'] = gbif_record['confidence']
+                data['gbif_matchType'] = gbif_record['matchType']
                 aut.write(f"{json.dumps(data)}\n")
