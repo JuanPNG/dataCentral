@@ -110,7 +110,12 @@ def complement_taxonomy_gbif_id(path):
     """
     with open(f'{path}/taxonomy_ena_gbif.jsonl', 'w') as aut:
         with open(f'{path}/taxonomy_ena.jsonl', 'r') as tax:
-            for line in tax:
+            for i, line in enumerate(tax):
                 data = json.loads(line)
+                print(f'Working on {i}. {data["species"]}')
                 data['gbif_usageKey'] = gbif_spp.name_backbone(data['species'])['usageKey']
+                data['gbif_scientificName'] = gbif_spp.name_backbone(data['species'])['scientificName']
+                data['gbif_status'] = gbif_spp.name_backbone(data['species'])['status']
+                data['gbif_confidence'] = gbif_spp.name_backbone(data['species'])['confidence']
+                data['gbif_matchType'] = gbif_spp.name_backbone(data['species'])['matchType']
                 aut.write(f"{json.dumps(data)}\n")
