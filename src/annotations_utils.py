@@ -43,38 +43,3 @@ def parse_annotations(url, path):
                 continue
 
     print(f'Annotations urls saved to {path}/annotations_parsed.jsonl')
-
-
-def get_annotation_taxonomy_ena(path):
-    with open(f'{path}/taxonomy_ena.jsonl', 'w') as tax:
-        with open(f'{path}/annotations_parsed.jsonl', 'r') as f:
-            for i, line in enumerate(f):
-                print(f"Working on: {i}")
-                sample_to_return = dict()
-                data = json.loads(line.rstrip())
-                sample_to_return["accession"] = data["accession"]
-
-                response = requests.get(
-                    f"https://www.ebi.ac.uk/ena/browser/api/xml/{sample_to_return['accession']}")
-                root = etree.fromstring(response.content)
-                sample_to_return['tax_id'] = root.find("ASSEMBLY").find("TAXON").find("TAXON_ID").text
-
-                phylogenetic_ranks = ('kingdom', 'phylum', 'class', 'order', 'family', 'genus')
-
-                for rank in phylogenetic_ranks:
-                    sample_to_return[rank] = None
-
-                response = requests.get(f"https://www.ebi.ac.uk/ena/browser/api/xml/{sample_to_return['tax_id']}")
-                root = etree.fromstring(response.content)
-
-                sample_to_return['species'] = root.find('taxon').get('scientificName')
-
-                try:
-                    for taxon in root.find('taxon').find('lineage').findall('taxon'):
-                        rank = taxon.get('rank')
-                        if rank in phylogenetic_ranks:
-                            scientific_name = taxon.get('scientificName')
-                            sample_to_return[rank] = scientific_name if scientific_name else None
-                except AttributeError:
-                    pass
-                tax.write(f"{json.dumps(sample_to_return)}\n")

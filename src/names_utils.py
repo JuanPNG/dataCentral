@@ -1,32 +1,43 @@
 import json
 import re
-import warnings
 
 from pygbif import species as gbif_spp
-from src.es_utils import get_species_data_es
+from src.es_utils import get_species_data_es, get_genome_note_title
 
 
-def get_genome_note_title(spp_name, species_portal_data):
-    """
-    Get genome note from local copy of the data portal with species information only.
-    :param spp_name: String with the species binomial name
-    :param species_portal_data: A dictionary with the species data from the ElasticSearch database
-    :return: String with the genome note title.
-    """
+def get_annotation_taxonomy_ena(path):
+    with open(f'{path}/taxonomy_ena.jsonl', 'w') as tax:
+        with open(f'{path}/annotations_parsed.jsonl', 'r') as f:
+            for i, line in enumerate(f):
+                print(f"Working on: {i}")
+                sample_to_return = dict()
+                data = json.loads(line.rstrip())
+                sample_to_return["accession"] = data["accession"]
 
-    for species, record in species_portal_data.items():
-        if spp_name not in species_portal_data.keys():
-            warnings.warn(f'Species name {spp_name} is not in Data Portal.')
-            title = 'CHECK_SPECIES_RECORD_DATA_PORTAL'
-            return title
-        else:
-            if spp_name == species:
-                if 'genome_notes' in record and len(record['genome_notes']) != 0:
-                    title = record['genome_notes'][0]['title']
-                else:
-                    title = 'NOT_AVAILABLE'
+                response = requests.get(
+                    f"https://www.ebi.ac.uk/ena/browser/api/xml/{sample_to_return['accession']}")
+                root = etree.fromstring(response.content)
+                sample_to_return['tax_id'] = root.find("ASSEMBLY").find("TAXON").find("TAXON_ID").text
 
-                return title
+                phylogenetic_ranks = ('kingdom', 'phylum', 'class', 'order', 'family', 'genus')
+
+                for rank in phylogenetic_ranks:
+                    sample_to_return[rank] = None
+
+                response = requests.get(f"https://www.ebi.ac.uk/ena/browser/api/xml/{sample_to_return['tax_id']}")
+                root = etree.fromstring(response.content)
+
+                sample_to_return['species'] = root.find('taxon').get('scientificName')
+
+                try:
+                    for taxon in root.find('taxon').find('lineage').findall('taxon'):
+                        rank = taxon.get('rank')
+                        if rank in phylogenetic_ranks:
+                            scientific_name = taxon.get('scientificName')
+                            sample_to_return[rank] = scientific_name if scientific_name else None
+                except AttributeError:
+                    pass
+                tax.write(f"{json.dumps(sample_to_return)}\n")
 
 
 def extract_name_gnote_title(x):
