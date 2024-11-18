@@ -7,7 +7,7 @@ def get_occurrences_gbif(path, limit=150):
     """
     Get occurrences and selected fields for species listed on the taxonomy_ena_gbif.jsonl file.
     Using pygbif occurrence search. This function is meant for prototyping.
-    :param path: Path to the jsonl file containing the gbif usageKey and the
+    :param path: Path to the directory with the jsonl file containing the gbif usageKey and the
     annotations accession number.
     :param limit: maximum number of occurrences to retrieve in the search. Default is 150.
     GBIF defaults to 300.
@@ -45,36 +45,36 @@ def get_occurrences_gbif(path, limit=150):
                 for record in occurrence_records:
                     record_to_return = {
                         'accession': accession,
-                        'gbif_usageKey': record.get('taxonKey', 'UNAVAILABLE'),
-                        'species': record.get('species', 'UNAVAILABLE'),
-                        'decimalLatitude': record.get('decimalLatitude', 'UNAVAILABLE'),
-                        'decimalLongitude': record.get('decimalLongitude', 'UNAVAILABLE'),
-                        'geodeticDatum': record.get('geodeticDatum', 'UNAVAILABLE'),
-                        'coordinateUncertaintyInMeters': record.get('coordinateUncertaintyInMeters', 'UNAVAILABLE'),
-                        'eventDate': record.get('eventDate', 'UNAVAILABLE'),
-                        'continent': record.get('continent', 'UNAVAILABLE'),
-                        'gadm': record.get('gadm', 'UNAVAILABLE'),
-                        'countryCode': record.get('countryCode', 'UNAVAILABLE'),
-                        # 'country': record.get('gadm').get('level0').get('name', 'UNAVAILABLE'),
-                        # 'province': record.get('gadm').get('level1').get('name', 'UNAVAILABLE'),
-                        # 'county': record.get('gadm').get('level2').get('name', 'UNAVAILABLE'),
-                        # 'municipality': record.get('gadm').get('level3').get('name', 'UNAVAILABLE'),
-                        'basisOfRecord': record.get('basisOfRecord', 'UNAVAILABLE'),
+                        'gbif_usageKey': record.get('taxonKey', None),
+                        'species': record.get('species', None),
+                        'decimalLatitude': record.get('decimalLatitude',  None),
+                        'decimalLongitude': record.get('decimalLongitude', None),
+                        'geodeticDatum': record.get('geodeticDatum', None),
+                        'coordinateUncertaintyInMeters': record.get('coordinateUncertaintyInMeters', None),
+                        'eventDate': record.get('eventDate', None),
+                        'continent': record.get('continent', None),
+                        'gadm': record.get('gadm', None),
+                        'countryCode': record.get('countryCode', None),
+                        # 'country': record.get('gadm').get('level0').get('name', None),
+                        # 'province': record.get('gadm').get('level1').get('name', None),
+                        # 'county': record.get('gadm').get('level2').get('name', None),
+                        # 'municipality': record.get('gadm').get('level3').get('name', None),
+                        'basisOfRecord': record.get('basisOfRecord', None),
                         'occurrenceStatus': record.get('occurrenceStatus'),
-                        'occurrenceID': record.get('occurrenceID', 'UNAVAILABLE'),
-                        'gbifID': record.get('gbifID', 'UNAVAILABLE'),
+                        'occurrenceID': record.get('occurrenceID', None),
+                        'gbifID': record.get('gbifID', None),
                         'issues': record.get('issues', 'NO_ISSUES_RETRIEVED'),
-                        'kingdom': record.get('kingdom', 'UNAVAILABLE'),
-                        'phylum': record.get('phylum', 'UNAVAILABLE'),
-                        'order': record.get('order', 'UNAVAILABLE'),
-                        'family': record.get('family', 'UNAVAILABLE'),
-                        'genus': record.get('genus', 'UNAVAILABLE'),
-                        'scientificName': record.get('scientificName', 'UNAVAILABLE'),
-                        'acceptedScientificName': record.get('acceptedScientificName', 'UNAVAILABLE'),
-                        'taxonomicStatus': record.get('taxonomicStatus', 'UNAVAILABLE'),
-                        # 'identifiedByIDs': record.get('identifiedByIDs', 'UNAVAILABLE'),
-                        'isSequenced': record.get('isSequenced', 'UNAVAILABLE'),
-                        'iucnRedListCategory': record.get('iucnRedListCategory', 'UNAVAILABLE')
+                        'kingdom': record.get('kingdom', None),
+                        'phylum': record.get('phylum', None),
+                        'order': record.get('order', None),
+                        'family': record.get('family', None),
+                        'genus': record.get('genus', None),
+                        'scientificName': record.get('scientificName', None),
+                        'acceptedScientificName': record.get('acceptedScientificName', None),
+                        'taxonomicStatus': record.get('taxonomicStatus', None),
+                        # 'identifiedByIDs': record.get('identifiedByIDs', None),
+                        'isSequenced': record.get('isSequenced', None),
+                        'iucnRedListCategory': record.get('iucnRedListCategory', None)
                     }
 
                     sp_file.write(f'{json.dumps(record_to_return)}\n')
@@ -97,3 +97,52 @@ def get_sp_occurrences_count(path):
                     occ_count=count
                 )
                 meta.write(f'{json.dumps(to_return)}\n')
+
+
+def request_download_gbif(species_name: str, gbif_usage_key: str) -> dict:
+
+    request_response = gbif_occ.download([
+        f'taxonKey = {gbif_usage_key}',
+        'hasCoordinate = TRUE',
+        'basisOfRecord = OCCURRENCE',
+        'occurrenceStatus = PRESENT',
+        'hasGeospatialIssue = False'
+    ])
+
+    metadata_to_return = dict(
+        species=species_name,
+        gbif_usage_key=gbif_usage_key,
+        download_key=request_response[0],
+        request_metadata=gbif_occ.download_meta(key=request_response[0])
+    )
+
+    # with open('./data/metadata/meta_down_species_name.jsonl', 'w') as outfile:
+    #     outfile.write(f'{json.dumps(metadata_to_return)}\n')
+
+    return metadata_to_return
+
+
+# with open('./data/metadata/meta_downloads.jsonl', 'w') as outfile:
+#     with open('./out/taxonomy_ena_gbif.jsonl', 'r') as tax:
+#
+#         dict_to_return = dict()
+#
+#         for line in tax:
+#             data = json.loads(line)
+#
+#             request_response = gbif_occ.download([
+#                 f'taxonKey = {data['gbif_usage_key']}',
+#                 'hasCoordinate = TRUE',
+#                 'basisOfRecord = OCCURRENCE',
+#                 'occurrenceStatus = PRESENT',
+#                 'hasGeospatialIssue = False'
+#             ])
+#
+#             dict_to_return[data['species']] = gbif_occ.download_meta(key=request_response[0])
+#
+#         outfile.write(f'{json.dumps(dict_to_return)}\n')
+# meta_test = request_download_gbif(species_name='Bignonia aequinoctialis', gbif_usage_key='3172559')
+# test = {'Bignonia aequinoctialis': gbif_occ.download_meta(key='0002056-241024112534372')}
+# print(json.dumps(test, indent=4))
+# print()
+# print(test['Bignonia aequinoctialis']['downloadLink'])

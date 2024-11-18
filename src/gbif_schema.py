@@ -37,7 +37,7 @@ gbif_schema = {
         },
         {
             "name": "eventDate",
-            "type": "DATE",
+            "type": "STRING",
             "mode": "NULLABLE"
         },
         {
@@ -124,7 +124,8 @@ gbif_schema = {
             "name": "countryCode",
             "type": "STRING",
             "mode": "NULLABLE"
-        },{
+        },
+        {
             "name": "basisOfRecord",
             "type": "STRING",
             "mode": "NULLABLE"
