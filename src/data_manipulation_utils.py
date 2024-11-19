@@ -26,6 +26,22 @@ def transform_jsonl_to_pandas(path, occ_file):
 
 
 def xy_climate_extraction_batch(path_occ_data_file, path_climate_layer_dir):
+    """
+    Extracts data from climatic layers using geographic coordinates and create a jsonl file containing accession,
+    species, decimalLongitude, decimalLatitude, and field for climatic data.
+    Both geographic coordinates and climatic layer must have the same coordinate reference system. In this
+    case we assume that the coordinate reference system is WGS84.
+    :param path_occ_data_file: relative or absolute path to the occurrence data jsonl file containing the fields:
+    accession, species, decimalLongitude, and decimalLatitude.
+    :param path_climate_layer_dir: relative or absolute path to the climatic layer directory in TIFF (*.tif) format.
+    the jsonl file with the extracted data will be saved in this directory.
+    :return: No return.
+    >>> # Example of usage:
+    >>> # xy_climate_extraction_batch(
+    >>> #     path_occ_data_file='./out/occurrences/raw/all_species_occurrences.jsonl',
+    >>> #     path_climate_layer_dir='./data/climate/'
+    >>> #)
+    """
     with open(path_occ_data_file, 'r') as f:
 
         list_of_records = []
