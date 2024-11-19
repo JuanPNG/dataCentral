@@ -1,5 +1,5 @@
-gbif_schema = {
-    "fields": [
+gbif_schema = [
+
         {
             "name": "accession",
             "type": "STRING",
@@ -200,5 +200,4 @@ gbif_schema = {
             "type": "STRING",
             "mode": "NULLABLE"
         }
-    ]
-}
+]
