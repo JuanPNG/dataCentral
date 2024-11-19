@@ -27,10 +27,11 @@ def transform_jsonl_to_pandas(path, occ_file):
 
 def xy_climate_extraction_batch(path_occ_data_file, path_climate_layer_dir):
     """
-    Extracts data from climatic layers using geographic coordinates and create a jsonl file containing accession,
-    species, decimalLongitude, decimalLatitude, and field for climatic data.
-    Both geographic coordinates and climatic layer must have the same coordinate reference system. In this
-    case we assume that the coordinate reference system is WGS84.
+    Extracts data from CHELSA bioclimatic layers using geographic coordinates and create a jsonl file containing
+    accession, species, decimalLongitude, decimalLatitude, and field for climatic data.
+    Both geographic coordinates and climatic layer must have the same coordinate reference system. In this case we
+    assume that the coordinate reference system is WGS84.
+    Climatic layer names must follow the default name given by CHELSA: "CHELSA_{your_var}_1981-2010_V.2.1.tif"
     :param path_occ_data_file: relative or absolute path to the occurrence data jsonl file containing the fields:
     accession, species, decimalLongitude, and decimalLatitude.
     :param path_climate_layer_dir: relative or absolute path to the climatic layer directory in TIFF (*.tif) format.
@@ -58,20 +59,29 @@ def xy_climate_extraction_batch(path_occ_data_file, path_climate_layer_dir):
         data_df = pd.json_normalize(list_of_records)
 
         for file in os.listdir(path_climate_layer_dir):
+
             if file.endswith(".tif"):
+
                 print(f'Extracting {file.rsplit("_")[1]}')
 
-                with rasterio.open(f'{path_climate_layer_dir}{file}') as cli_var:
+                with rasterio.open(f'{path_climate_layer_dir}{file}') as clim_var:
+
+                    if clim_var.crs != 'EPSG:4326':
+                        raise TypeError(
+                            'Climatic layer must have the EPSG:4326 coordinate reference system. Got {}'.format(
+                                clim_var.crs)
+                        )
+
                     # Extraction produce a generator of arrays. Unpacked using list.
                     extracted_vals = list(
-                        cli_var.sample(
+                        clim_var.sample(
                             xy=[(data_df['decimalLongitude'], data_df['decimalLatitude'])]
                         )
                     )
-                    # Getting values from array
+                    # Getting values from array and saving them as vars in data frame
                     data_df[file.rsplit("_")[1]] = [val.item() for val in extracted_vals]
 
-                print(f'Extraction for {file.rsplit("_")[1]} completed.')
+                print(f'{file.rsplit("_")[1]} extraction completed.')
 
         with open(f'{path_climate_layer_dir}climate_dataset.jsonl', 'w') as jsonl_file:
             for r in range(0, data_df.shape[0]):
