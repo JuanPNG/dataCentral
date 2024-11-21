@@ -7,15 +7,14 @@ import geopandas as gpd
 import rasterio
 
 
-def transform_jsonl_to_pandas(path, occ_file):
+def transform_jsonl_to_pandas(path_occ_file):
     """
-    Transforms jsonl file produced by get_occurrences_gbif into a pandas dataframe.
-    :param path: Path to the root directory containing occurrences/raw/occ_sp_name.jsonl file.
-    :param occ_file: occ_sp_name.jsonl with occurrence records from GBIF.
+    Transforms jsonl file with occurrence data into a pandas dataframe.
+    :param path_occ_file: Path to a JSONL file containing the data.
     :return: pandas data frame
-    >>> # transform_jsonl_to_pandas(path='./out', occ_file=occ_Abrostola_tripartita.jsonl)
+    >>> # transform_jsonl_to_pandas(path_occ_file='./out/occ_Abrostola_tripartita.jsonl')
     """
-    with open(f'{path}/occurrences/raw/{occ_file}', 'r') as f:
+    with open(f'{path_occ_file}', 'r') as f:
         list_of_records = []
 
         for line in f:
