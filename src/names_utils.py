@@ -1,6 +1,8 @@
 import json
 import re
 
+import requests
+from lxml import etree
 from pygbif import species as gbif_spp
 from src.es_utils import get_species_data_es, get_genome_note_title
 
