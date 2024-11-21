@@ -26,25 +26,27 @@ def transform_jsonl_to_pandas(path_occ_file):
         return records
 
 
-def xy_climate_extraction_batch(path_occ_data_file, path_climate_layer_dir):
+def xy_climate_extraction_batch(path_occ_file, path_climate_layer_dir, path_to_save_dir):
     """
     Extracts data from CHELSA bioclimatic layers using geographic coordinates and create a jsonl file containing
     accession, species, decimalLongitude, decimalLatitude, and field for climatic data.
     Both geographic coordinates and climatic layer must have the same coordinate reference system. In this case we
     assume that the coordinate reference system is WGS84.
     Climatic layer names must follow the default name given by CHELSA: "CHELSA_{your_var}_1981-2010_V.2.1.tif"
-    :param path_occ_data_file: relative or absolute path to the occurrence data jsonl file containing the fields:
+    :param path_occ_file: relative or absolute path to the occurrence data jsonl file containing the fields:
     accession, species, decimalLongitude, and decimalLatitude.
     :param path_climate_layer_dir: relative or absolute path to the climatic layer directory in TIFF (*.tif) format.
     the jsonl file with the extracted data will be saved in this directory.
+    :param path_to_save_dir: path to directory to save the annotated occurrences with climate data.
     :return: No return.
     >>> # Example of usage:
     >>> # xy_climate_extraction_batch(
-    >>> #     path_occ_data_file='./out/occurrences/raw/all_species_occurrences.jsonl',
-    >>> #     path_climate_layer_dir='./data/climate/'
+    >>> #     path_occ_file='./out/occurrences/raw/all_species_occurrences.jsonl',
+    >>> #     path_climate_layer_dir='./data/climate/',
+    >>> #     path_to_save_dir='./out/'
     >>> #)
     """
-    with open(path_occ_data_file, 'r') as f:
+    with open(path_occ_file, 'r') as f:
 
         list_of_records = []
 
@@ -84,7 +86,9 @@ def xy_climate_extraction_batch(path_occ_data_file, path_climate_layer_dir):
 
                 print(f'{file.rsplit("_")[1]} extraction completed.')
 
-        with open(f'{path_climate_layer_dir}climate_dataset.jsonl', 'w') as jsonl_file:
+        Path(f'{path_to_save_dir}spatial_annotation/').mkdir(parents=True, exist_ok=True)
+
+        with open(f'{path_to_save_dir}spatial_annotation/climate_dataset.jsonl', 'w') as jsonl_file:
 
             for r in range(0, data_df.shape[0]):
                 row_dict = data_df.iloc[r].to_dict()
@@ -93,21 +97,21 @@ def xy_climate_extraction_batch(path_occ_data_file, path_climate_layer_dir):
             print(f'Climate data extraction file climate_dataset.jsonl saved to {path_climate_layer_dir}')
 
 
-def xy_vector_annotation(path_occ_data_file, path_vector_file, path_to_save_dir):
+def xy_vector_annotation(path_occ_file, path_vector_file, path_to_save_dir):
     """
     Execute a spatial join of occurrences geographic points with spatial vector layers.
-    :param path_occ_data_file: path to the JSONL file containing GBIF occurrence data.
+    :param path_occ_file: path to the JSONL file containing GBIF occurrence data.
     :param path_vector_file: path to the file containing the spatial vector layer.
     :param path_to_save_dir: path to directory to save the spatially annotated occurrences.
     :return: No return
     >>> # Example of usage:
     >>> # xy_vector_annotation(
-    >>> # path_occ_data_file='./out/occurrences/raw/all_species_occurrences.jsonl',
+    >>> # path_occ_file='./out/occurrences/raw/all_species_occurrences.jsonl',
     >>> # path_vector_file='./data/bioregions/Ecoregions2017.zip',
     >>> # path_to_save_dir='./out/'
     >>> # )
     """
-    with open(path_occ_data_file, 'r') as f:
+    with open(path_occ_file, 'r') as f:
 
         list_of_records = []
 
