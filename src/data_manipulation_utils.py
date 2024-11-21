@@ -1,7 +1,9 @@
 import json
 import os
+from pathlib import Path
 
 import pandas as pd
+import geopandas as gpd
 import rasterio
 
 
@@ -84,7 +86,76 @@ def xy_climate_extraction_batch(path_occ_data_file, path_climate_layer_dir):
                 print(f'{file.rsplit("_")[1]} extraction completed.')
 
         with open(f'{path_climate_layer_dir}climate_dataset.jsonl', 'w') as jsonl_file:
+
             for r in range(0, data_df.shape[0]):
                 row_dict = data_df.iloc[r].to_dict()
                 jsonl_file.write(f'{json.dumps(row_dict)}\n')
+
             print(f'Climate data extraction file climate_dataset.jsonl saved to {path_climate_layer_dir}')
+
+
+def xy_vector_annotation(path_occ_data_file, path_vector_file, path_to_save_dir):
+    """
+    Execute a spatial join of occurrences geographic points with spatial vector layers.
+    :param path_occ_data_file: path to the JSONL file containing GBIF occurrence data.
+    :param path_vector_file: path to the file containing the spatial vector layer.
+    :param path_to_save_dir: path to directory to save the spatially annotated occurrences.
+    :return: No return
+    >>> # Example of usage:
+    >>> # xy_vector_annotation(
+    >>> # path_occ_data_file='./out/occurrences/raw/all_species_occurrences.jsonl',
+    >>> # path_vector_file='./data/bioregions/Ecoregions2017.zip',
+    >>> # path_to_save_dir='./out/'
+    >>> # )
+    """
+    with open(path_occ_data_file, 'r') as f:
+
+        list_of_records = []
+
+        for line in f:
+            record = json.loads(line)
+            data_to_return = dict()
+            data_to_return['accession'] = record['accession']
+            data_to_return['species'] = record['species']
+            data_to_return['decimalLongitude'] = record['decimalLongitude']
+            data_to_return['decimalLatitude'] = record['decimalLatitude']
+            list_of_records.append(data_to_return)
+
+        data_df = pd.json_normalize(list_of_records)
+
+        geom = gpd.points_from_xy(data_df['decimalLongitude'], data_df['decimalLatitude'], crs='EPSG:4326')
+
+        data_gpd = gpd.GeoDataFrame(data_df, geometry=geom)
+
+        spatial_layer = gpd.read_file(path_vector_file)
+
+        if spatial_layer.crs != 'EPSG:4326':
+            raise TypeError(
+                'Vector layer must have the EPSG:4326 coordinate reference system. Got {}'.format(
+                    spatial_layer.crs)
+            )
+
+        layer_name = path_vector_file.rsplit('/')[-1].split('.')[0]
+        print(f'Extracting data from {layer_name}')
+        data_annotation = data_gpd.sjoin(spatial_layer, how='left')
+        print('Extraction completed.')
+
+        columns_to_drop = ['geometry', 'index_right', 'OBJECTID', 'SHAPE_LENG', 'SHAPE_AREA',
+                           'COLOR', 'COLOR_BIO', 'COLOR_NNH']
+
+        data_annotation = data_annotation.drop(columns=columns_to_drop)
+
+        print(data_annotation.columns)
+
+        data_annotation = data_annotation.fillna('NaN')
+
+        Path(f'{path_to_save_dir}spatial_annotation/').mkdir(parents=True, exist_ok=True)
+
+        with open(f'{path_to_save_dir}spatial_annotation/{layer_name}_annotation_dataset.jsonl', 'w') as jsonl_file:
+
+            for r in range(0, data_annotation.shape[0]):
+                row_dict = data_annotation.iloc[r].to_dict()
+                jsonl_file.write(f'{json.dumps(row_dict)}\n')
+
+            print(f'Vector data extraction file saved to '
+                  f'{path_to_save_dir}spatial_annotation/{layer_name}_annotation_dataset.jsonl')
