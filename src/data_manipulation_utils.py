@@ -1,5 +1,7 @@
 import json
 import os
+from datetime import datetime
+from functools import reduce
 from pathlib import Path
 
 import pandas as pd
@@ -162,3 +164,50 @@ def xy_vector_annotation(path_occ_file, path_vector_file, path_to_save_dir):
 
             print(f'Vector data extraction file saved to '
                   f'{path_to_save_dir}spatial_annotation/{layer_name}_annotation_dataset.jsonl')
+
+
+def concat_spatial_annotations(path_annotation_dir, save_file=False):
+    """
+    Concatenate spatial annotations into a single dataframe.
+    :param path_annotation_dir: Path to folder with annotations to concatenate.
+    :param save_file: default false. When True a jsonl file will be saved to path_annotation_dir.
+    :return: pandas dataframe with concatenated annotations.
+    >>>> # Example of usage:
+    >>>> # test = concat_spatial_annotations(path_annotation_dir="./out/spatial_annotation/", save_file=True)
+    """
+
+    df_list = []
+
+    for file in os.listdir(path_annotation_dir):
+
+        if file.endswith(".jsonl"):
+            print(f'Parsing jsonl to pandas dataframe: {file}')
+            df = transform_jsonl_to_pandas(
+                path_occ_file=f'{path_annotation_dir}{file}'
+            )
+            print('Parsing successful.')
+            df_list.append(df)
+
+    cols_to_check = ['accession', 'species', 'decimalLongitude', 'decimalLatitude']
+
+    if not all(x[cols_to_check].equals(y[cols_to_check]) for (x, y) in pairwise(df_list)):
+        raise ValueError("Columns' values do not match: ['accession', 'species', 'decimalLongitude', "
+                         "'decimalLatitude']. These columns must be equal. Please check your datasets.")
+
+    concat_df = reduce(
+        lambda left, right: pd.concat([left.reset_index(drop=True), right.drop(cols_to_check, axis=1)], axis=1),
+        df_list
+    )
+
+    if save_file:
+
+        date = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        with open(f'{path_annotation_dir}concat_spatial_annotations_{date}.jsonl', 'w') as jsonl_file:
+            for r in range(0, concat_df.shape[0]):
+                row_dict = concat_df.iloc[r].to_dict()
+                jsonl_file.write(f'{json.dumps(row_dict)}\n')
+
+        print(f"Concatenated file saved to {path_annotation_dir}concat_spatial_annotations_{date}.jsonl")
+
+    return concat_df
