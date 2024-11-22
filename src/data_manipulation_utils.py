@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from functools import reduce
+from itertools import pairwise
 from pathlib import Path
 
 import pandas as pd
