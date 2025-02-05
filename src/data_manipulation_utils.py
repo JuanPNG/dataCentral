@@ -68,7 +68,9 @@ def xy_climate_extraction_batch(path_occ_file, path_climate_layer_dir, path_to_s
 
             if file.endswith(".tif"):
 
-                print(f'Extracting {file.rsplit("_")[1]}')
+                var_name = file.rsplit("_")[1]
+
+                print(f'Extracting {var_name}')
 
                 with rasterio.open(f'{path_climate_layer_dir}{file}') as clim_var:
 
@@ -84,10 +86,24 @@ def xy_climate_extraction_batch(path_occ_file, path_climate_layer_dir, path_to_s
                             xy=[(data_df['decimalLongitude'], data_df['decimalLatitude'])]
                         )
                     )
-                    # Getting values from array and saving them as vars in data frame
-                    data_df[file.rsplit("_")[1]] = [val.item() for val in extracted_vals]
 
-                print(f'{file.rsplit("_")[1]} extraction completed.')
+                    # Temperature data layers to rescale
+                    vars_to_Celsius = [
+                        'bio1',
+                        'bio5',
+                        'bio6',
+                        'bio8',
+                        'bio9',
+                        'bio10',
+                        'bio11'
+                    ]
+
+                    if var_name in vars_to_Celsius:
+                        data_df[var_name] = [val.item() * 0.1 - 273.15 for val in extracted_vals]
+                    else:
+                        data_df[var_name] = [val.item() for val in extracted_vals]
+
+                print(f'{var_name} extraction completed.')
 
         Path(f'{path_to_save_dir}spatial_annotation/').mkdir(parents=True, exist_ok=True)
 
@@ -97,7 +113,7 @@ def xy_climate_extraction_batch(path_occ_file, path_climate_layer_dir, path_to_s
                 row_dict = data_df.iloc[r].to_dict()
                 jsonl_file.write(f'{json.dumps(row_dict)}\n')
 
-            print(f'Climate data extraction file climate_dataset.jsonl saved to {path_climate_layer_dir}')
+            print(f'Climate data extraction file climate_dataset.jsonl saved to {path_to_save_dir}spatial_annotation/')
 
 
 def xy_vector_annotation(path_occ_file, path_vector_file, path_to_save_dir):
