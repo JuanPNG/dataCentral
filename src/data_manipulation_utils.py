@@ -99,7 +99,7 @@ def xy_climate_extraction_batch(path_occ_file, path_climate_layer_dir, path_to_s
                     ]
 
                     if var_name in vars_to_Celsius:
-                        data_df[var_name] = [val.item() * 0.1 - 273.15 for val in extracted_vals]
+                        data_df[var_name] = [round(val.item() * 0.1 - 273.15, 2) for val in extracted_vals]
                     else:
                         data_df[var_name] = [val.item() for val in extracted_vals]
 
