@@ -88,7 +88,7 @@ def xy_climate_extraction_batch(path_occ_file, path_climate_layer_dir, path_to_s
                     )
 
                     # Temperature data layers to rescale
-                    vars_to_Celsius = [
+                    temp_to_Celsius = [
                         'bio1',
                         'bio5',
                         'bio6',
@@ -98,10 +98,10 @@ def xy_climate_extraction_batch(path_occ_file, path_climate_layer_dir, path_to_s
                         'bio11'
                     ]
 
-                    if var_name in vars_to_Celsius:
+                    if var_name in temp_to_Celsius:
                         data_df[var_name] = [round(val.item() * 0.1 - 273.15, 2) for val in extracted_vals]
                     else:
-                        data_df[var_name] = [val.item() for val in extracted_vals]
+                        data_df[var_name] = [round(val.item() * 0.1) for val in extracted_vals]
 
                 print(f'{var_name} extraction completed.')
 
