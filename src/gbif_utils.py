@@ -29,7 +29,13 @@ def get_occurrences_gbif(path, limit=150):
             results = gbif_occ.search(
                 # scientificName=species_name,
                 taxonKey=gbif_usage_key,
-                basisOfRecord='OCCURRENCE',
+                basisOfRecord=[
+                    'PRESERVED_SPECIMEN',
+                    'HUMAN_OBSERVATION',
+                    'MACHINE_OBSERVATION',
+                    'MATERIAL_CITATION',
+                    'LIVING_SPECIMEN'
+                ],
                 occurrenceStatus='PRESENT',
                 hasCoordinate=True,
                 hasGeospatialIssue=False,
