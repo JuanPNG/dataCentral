@@ -16,7 +16,7 @@ def get_occurrences_gbif(path, limit=150):
 
     Path(f'{path}/occurrences/raw').mkdir(parents=True, exist_ok=True)
 
-    with open(f'{path}/taxonomy_ena_gbif.jsonl', 'r') as tax:
+    with open(f'{path}/annotations/taxonomy_ena_gbif.jsonl', 'r') as tax:
 
         for i, line in enumerate(tax):
             data = json.loads(line)
@@ -31,10 +31,13 @@ def get_occurrences_gbif(path, limit=150):
                 taxonKey=gbif_usage_key,
                 basisOfRecord=[
                     'PRESERVED_SPECIMEN',
-                    'HUMAN_OBSERVATION',
-                    'MACHINE_OBSERVATION',
+                    'MATERIAL_SAMPLE',
+                    # 'HUMAN_OBSERVATION',
+                    # 'MACHINE_OBSERVATION',
+                    'LIVING_SPECIMEN',
+                    'FOSSIL_SPECIMEN',
                     'MATERIAL_CITATION',
-                    'LIVING_SPECIMEN'
+                    'OCCURRENCE'
                 ],
                 occurrenceStatus='PRESENT',
                 hasCoordinate=True,
