@@ -22,12 +22,12 @@
   {
     "mode": "NULLABLE",
     "name": "bio1",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio2",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
@@ -37,82 +37,82 @@
   {
     "mode": "NULLABLE",
     "name": "bio4",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio5",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio6",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio7",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio8",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio9",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio10",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio11",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio12",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio13",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio14",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio15",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio16",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio17",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio18",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
     "name": "bio19",
-    "type": "INTEGER"
+    "type": "FLOAT"
   },
   {
     "mode": "NULLABLE",
