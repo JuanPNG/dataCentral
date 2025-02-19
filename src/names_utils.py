@@ -7,39 +7,45 @@ from pygbif import species as gbif_spp
 from src.es_utils import get_species_data_es, get_genome_note_title
 
 
-def get_annotation_taxonomy_ena(path):
-    with open(f'{path}/taxonomy_ena.jsonl', 'w') as tax:
-        with open(f'{path}/annotations_parsed.jsonl', 'r') as f:
+def get_ena_taxonomy(accessions_file, taxonomy_file):
+    """
+    Get taxonomy information from ENA API using tax_id from Biodiversity Portal
+    :param accessions_file: JSONL file path with a list of dictionaries containing accession numbers and tax_id keys
+    :param taxonomy_file: file path to save the retrieved taxonomy in JSONL format
+    :return: No return.
+    """
+
+    with open(taxonomy_file, 'w') as tax:
+
+        with open(accessions_file, 'r') as f:
+
+            phylogenetic_ranks = ('kingdom', 'phylum', 'class', 'order', 'family', 'genus')
+
             for i, line in enumerate(f):
-                print(f"Working on: {i}")
-                sample_to_return = dict()
+                print(f'Working on {i}')
+                accession_tax = {}
                 data = json.loads(line.rstrip())
-                sample_to_return["accession"] = data["accession"]
-
-                response = requests.get(
-                    f"https://www.ebi.ac.uk/ena/browser/api/xml/{sample_to_return['accession']}")
-                root = etree.fromstring(response.content)
-                sample_to_return['tax_id'] = root.find("ASSEMBLY").find("TAXON").find("TAXON_ID").text
-
-                phylogenetic_ranks = ('kingdom', 'phylum', 'class', 'order', 'family', 'genus')
+                accession_tax['accession'] = data["accession"]
+                accession_tax['tax_id'] = data["tax_id"]
 
                 for rank in phylogenetic_ranks:
-                    sample_to_return[rank] = None
+                    accession_tax[rank] = None
 
-                response = requests.get(f"https://www.ebi.ac.uk/ena/browser/api/xml/{sample_to_return['tax_id']}")
-                root = etree.fromstring(response.content)
+                ena_resp = requests.get(f'https://www.ebi.ac.uk/ena/browser/api/xml/{data['tax_id']}')
+                root = etree.fromstring(ena_resp.content)
 
-                sample_to_return['species'] = root.find('taxon').get('scientificName')
+                accession_tax['species'] = root.find('taxon').get('scientificName')
 
                 try:
                     for taxon in root.find('taxon').find('lineage').findall('taxon'):
                         rank = taxon.get('rank')
                         if rank in phylogenetic_ranks:
                             scientific_name = taxon.get('scientificName')
-                            sample_to_return[rank] = scientific_name if scientific_name else None
+                            accession_tax[rank] = scientific_name if scientific_name else None
                 except AttributeError:
                     pass
-                tax.write(f"{json.dumps(sample_to_return)}\n")
+
+                tax.write(f"{json.dumps(accession_tax)}\n")
 
 
 def extract_name_gnote_title(x):
