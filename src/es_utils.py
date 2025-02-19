@@ -1,3 +1,4 @@
+import json
 import warnings
 
 
@@ -36,3 +37,63 @@ def get_genome_note_title(spp_name, species_portal_data):
                     title = 'NOT_AVAILABLE'
 
                 return title
+
+
+def get_annotation_accessions(index_name, es, size, pages, file_path):
+    """
+    Get accession numbers, species names, and taxon id for genomes with annotations
+    from the Biodiversity Data Portal ElasticSearch database. If a file path is given,
+    it will save the results to a file. Otherwise, it will return a list of dictionaries
+    with the result.
+    :param index_name: index in Elasticsearch database
+    :param es: Elasticsearch client
+    :param size: Maximum size of the response
+    :param pages: Maximum pages for pagination of the response
+    :param file_path: full path to JSONL file to save the results.
+    :return: List of dictionaries with accession numbers, species, and taxon id.
+    """
+    accessions = []
+    after = None
+
+    for page in range(pages):
+        body = {
+            'size': size,
+            'sort': {'tax_id': 'asc'},
+            'query': {
+                'match': {
+                    'annotation_complete': 'Done'
+                }
+            }
+        }
+
+        if after:
+            body['search_after'] = after
+
+        data = es.search(
+            index=index_name,
+            body=body
+        )
+
+        hits = data['hits']['hits']
+
+        for record in hits:
+            accession = {
+                'accession': record['_source']['annotation'][0]['accession'],
+                'tax_id': record['_source']['tax_id'],
+                'species': record['_source']['annotation'][0]['species']
+            }
+            accessions.append(accession)
+
+        if hits:
+            after = hits[-1]['sort']
+
+    if file_path:
+        with open(file_path, 'w') as f:
+            for accession in accessions:
+                f.write(f'{json.dumps(accession)}\n')
+
+        return print(f'Saved {len(accessions)} accessions to {file_path}')
+
+    else:
+
+        return accessions
