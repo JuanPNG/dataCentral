@@ -90,16 +90,25 @@ def get_occurrences_gbif(path, limit=150):
                     sp_file.write(f'{json.dumps(record_to_return)}\n')
 
 
-def get_sp_occurrences_count(path):
+def get_occurrence_count(occ_count_file, taxonomy_file, basis_of_record):
     """
-    Get the number of occurrences for the species listed on taxonomy_ena_gbif.jsonl file
-    :return: No return object. File meta_sp_occs_count.jsonl saved to path.
+    Get the number of occurrences for the species listed on taxonomy_file.
+    :param occ_count_file: File path to save the occurrence counts.
+    :param taxonomy_file: File path with the taxonomy containing accession, species, and gbif_usageKey.
+    :param basis_of_record: The basis of record for the species occurrence.
+    :return: No return object.
     """
-    with open(f'{path}/meta_sp_occs_count.jsonl', 'w') as meta:
-        with open(f'.{path}/taxonomy_ena_gbif.jsonl', 'r') as tax:
-            for line in tax:
+    with open(occ_count_file, 'w') as meta:
+        with open(taxonomy_file, 'r') as tax:
+            for i, line in enumerate(tax):
                 data = json.loads(line)
-                count = gbif_occ.count(taxonKey=data['gbif_usageKey'], isGeoreferenced=True, basisOfRecord='OCCURRENCE')
+                print(f'Working on {i}. {data['species']}')
+                count = gbif_occ.count(
+                    taxonKey=data['gbif_usageKey'],
+                    isGeoreferenced=True,
+                    basisOfRecord=basis_of_record
+                )
+                print(f'{count} {basis_of_record} occurrences found.')
                 to_return = dict(
                     accession=data['accession'],
                     species=data['species'],
