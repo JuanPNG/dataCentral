@@ -120,25 +120,3 @@ def complement_taxonomy_gnote(path, es_conn):
                 data['genome_note'] = extract_name_gnote_title(x=title)
                 aut.write(f"{json.dumps(data)}\n")
 
-
-def complement_taxonomy_gbif_id(path):
-    """
-    Complements the ena taxonomy with the GBIF usageKey for the species name.
-    :param path: Path to the taxonomy_ena.jsonl file.
-    :return: The same taxonomy_ena.jsonl file but with GBIF usageKey
-    """
-    with open(f'{path}/taxonomy_ena_gbif.jsonl', 'w') as aut:
-        with open(f'{path}/taxonomy_ena.jsonl', 'r') as tax:
-            for i, line in enumerate(tax):
-                data = json.loads(line)
-                print(f'Working on {i}. {data["species"]}')
-                gbif_record = gbif_spp.name_backbone(
-                    name=data['species'],
-                    family=data['family']
-                )
-                data['gbif_usageKey'] = gbif_record['usageKey']
-                data['gbif_scientificName'] = gbif_record['scientificName']
-                data['gbif_status'] = gbif_record['status']
-                data['gbif_confidence'] = gbif_record['confidence']
-                data['gbif_matchType'] = gbif_record['matchType']
-                aut.write(f"{json.dumps(data)}\n")
