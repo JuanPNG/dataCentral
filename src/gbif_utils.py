@@ -162,14 +162,14 @@ def validate_names_gbif(ena_taxonomy_file, validated_file):
     """
     Validates species names from the ena taxonomy with the GBIF taxonomic backbone.
     usageKey, scientificName, status, confidence and match type are provided for each species name.
-    Names with matchType different from 'EXACT' are saved in './annotations_taxonomy_gbif_check.jsonl'
+    Names with matchType different from 'EXACT' are saved in './annotation_taxonomy_gbif_check.jsonl'
     :param validated_file: File path to the validated file.
     :param ena_taxonomy_file: File path to the ena taxonomy file.
     :return: The same ena_taxonomy_file file but complemented with GBIF usageKey, scientificName, status, confidence and
     match type.
     """
 
-    no_match = []
+    to_check = []
 
     with open(validated_file, 'w') as val:
 
@@ -181,25 +181,48 @@ def validate_names_gbif(ena_taxonomy_file, validated_file):
 
                 gbif_record = gbif_spp.name_backbone(
                     name=data['species'],
-                    family=data['family']
+                    rank='species',
+                    strict=False,
+                    verbose=True
                 )
 
-                data['gbif_usageKey'] = gbif_record['usageKey']
-                data['gbif_scientificName'] = gbif_record['scientificName']
-                data['gbif_rank'] = gbif_record['rank']
-                data['gbif_status'] = gbif_record['status']
-                data['gbif_confidence'] = gbif_record['confidence']
-                data['gbif_matchType'] = gbif_record['matchType']
+                if gbif_record['matchType'] == 'NONE':
 
-                if gbif_record['matchType'] != 'EXACT':
-                    no_match.append(data)
+                    data['matchType'] = gbif_record['matchType']
+                    data['gbif_confidence'] = gbif_record['confidence']
+
+                    to_check.append(data)
+
                 else:
-                    val.write(f"{json.dumps(data)}\n")
 
-    with open('./out/annotations/annotations_taxonomy_gbif_check.jsonl', 'w') as nm:
+                    data['gbif_matchType'] = gbif_record['matchType']
+                    data['gbif_confidence'] = gbif_record['confidence']
+                    data['gbif_usageKey'] = gbif_record['usageKey']
+                    data['gbif_scientificName'] = gbif_record['scientificName']
+                    data['gbif_canonicalName'] = gbif_record['canonicalName']
+                    data['gbif_rank'] = gbif_record['rank']
+                    data['gbif_status'] = gbif_record['status']
 
-        for data in no_match:
-            nm.write(f'{json.dumps(data)}\n')
+                    if gbif_record['status'] == 'SYNONYM' or gbif_record['matchType'] != 'EXACT':
 
-        print(f'No matched taxonomies found for {len(no_match)} species.'
-              f'Records saved to annotations_taxonomy_gbif_check.jsonl')
+                        if gbif_record.get('acceptedUsageKey') is not None:
+                            data['gbif_acceptedUsageKey'] = gbif_record['acceptedUsageKey']
+                            data['gbif_accepted_species'] = gbif_record['species']
+
+                        if gbif_record.get('alternatives') is not None:
+                            data['alternatives'] = gbif_record['alternatives']
+
+                        to_check.append(data)
+
+                    else:
+
+                        val.write(f"{json.dumps(data)}\n")
+
+    with open('./out/annotations/annotation_taxonomy_gbif_check.jsonl', 'w') as nm:
+
+        for record in to_check:
+            nm.write(f'{json.dumps(record)}\n')
+
+        print(f'Not matching taxonomies found for {len(to_check)} species.\n'
+              f'Records saved to annotation_taxonomy_gbif_check.jsonl\n'
+              f'Check for Synonyms, Fuzzy matches, and Higher rank matches.\n')
