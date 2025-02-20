@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from pygbif import occurrences as gbif_occ
+from pygbif import species as gbif_spp
 
 
 def get_occurrences_gbif(path, limit=150):
@@ -155,3 +156,50 @@ def request_download_gbif(species_name: str, gbif_usage_key: str) -> dict:
 # print(json.dumps(test, indent=4))
 # print()
 # print(test['Bignonia aequinoctialis']['downloadLink'])
+
+
+def validate_names_gbif(ena_taxonomy_file, validated_file):
+    """
+    Validates species names from the ena taxonomy with the GBIF taxonomic backbone.
+    usageKey, scientificName, status, confidence and match type are provided for each species name.
+    Names with matchType different from 'EXACT' are saved in './annotations_taxonomy_gbif_check.jsonl'
+    :param validated_file: File path to the validated file.
+    :param ena_taxonomy_file: File path to the ena taxonomy file.
+    :return: The same ena_taxonomy_file file but complemented with GBIF usageKey, scientificName, status, confidence and
+    match type.
+    """
+
+    no_match = []
+
+    with open(validated_file, 'w') as val:
+
+        with open(ena_taxonomy_file, 'r') as tax:
+
+            for i, line in enumerate(tax):
+                data = json.loads(line)
+                print(f'Working on {i}. {data["species"]}')
+
+                gbif_record = gbif_spp.name_backbone(
+                    name=data['species'],
+                    family=data['family']
+                )
+
+                data['gbif_usageKey'] = gbif_record['usageKey']
+                data['gbif_scientificName'] = gbif_record['scientificName']
+                data['gbif_rank'] = gbif_record['rank']
+                data['gbif_status'] = gbif_record['status']
+                data['gbif_confidence'] = gbif_record['confidence']
+                data['gbif_matchType'] = gbif_record['matchType']
+
+                if gbif_record['matchType'] != 'EXACT':
+                    no_match.append(data)
+                else:
+                    val.write(f"{json.dumps(data)}\n")
+
+    with open('./out/annotations/annotations_taxonomy_gbif_check.jsonl', 'w') as nm:
+
+        for data in no_match:
+            nm.write(f'{json.dumps(data)}\n')
+
+        print(f'No matched taxonomies found for {len(no_match)} species.'
+              f'Records saved to annotations_taxonomy_gbif_check.jsonl')
