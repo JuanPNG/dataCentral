@@ -57,6 +57,7 @@ def xy_climate_extraction_batch(path_occ_file, path_climate_layer_dir, path_to_s
             record = json.loads(line)
             data_to_return = dict()
             data_to_return['accession'] = record['accession']
+            data_to_return['tax_id'] = record['tax_id']
             data_to_return['species'] = record['species']
             data_to_return['decimalLongitude'] = record['decimalLongitude']
             data_to_return['decimalLatitude'] = record['decimalLatitude']
@@ -138,6 +139,7 @@ def xy_vector_annotation(path_occ_file, path_vector_file, path_to_save_dir):
             record = json.loads(line)
             data_to_return = dict()
             data_to_return['accession'] = record['accession']
+            data_to_return['tax_id'] = record['tax_id']
             data_to_return['species'] = record['species']
             data_to_return['decimalLongitude'] = record['decimalLongitude']
             data_to_return['decimalLatitude'] = record['decimalLatitude']
@@ -163,7 +165,8 @@ def xy_vector_annotation(path_occ_file, path_vector_file, path_to_save_dir):
         print('Extraction completed.')
 
         columns_to_drop = ['geometry', 'index_right', 'OBJECTID', 'SHAPE_LENG', 'SHAPE_AREA',
-                           'COLOR', 'COLOR_BIO', 'COLOR_NNH']
+                           'COLOR', 'COLOR_BIO', 'COLOR_NNH', 'BIOME_NUM', 'ECO_BIOME_',
+                           'NNH', 'ECO_ID', 'NNH_NAME', 'LICENSE']
 
         data_annotation = data_annotation.drop(columns=columns_to_drop)
 
@@ -197,6 +200,9 @@ def concat_spatial_annotations(path_annotation_dir, save_file=False):
 
     for file in os.listdir(path_annotation_dir):
 
+        if file.startswith('concat_'):
+            continue
+
         if file.endswith(".jsonl"):
             print(f'Parsing jsonl to pandas dataframe: {file}')
             df = transform_jsonl_to_pandas(
@@ -205,7 +211,7 @@ def concat_spatial_annotations(path_annotation_dir, save_file=False):
             print('Parsing successful.')
             df_list.append(df)
 
-    cols_to_check = ['accession', 'species', 'decimalLongitude', 'decimalLatitude']
+    cols_to_check = ['accession', 'tax_id', 'species', 'decimalLongitude', 'decimalLatitude']
 
     if not all(x[cols_to_check].equals(y[cols_to_check]) for (x, y) in pairwise(df_list)):
         raise ValueError("Columns' values do not match: ['accession', 'species', 'decimalLongitude', "
