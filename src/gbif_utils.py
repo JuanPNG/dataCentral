@@ -17,13 +17,14 @@ def get_occurrences_gbif(path, limit=150):
 
     Path(f'{path}/occurrences/raw').mkdir(parents=True, exist_ok=True)
 
-    with open(f'{path}/annotations/taxonomy_ena_gbif.jsonl', 'r') as tax:
+    with open(f'{path}/annotations/annotation_taxonomy_upload.jsonl', 'r') as tax:
 
         for i, line in enumerate(tax):
             data = json.loads(line)
             species_name = data['species']
             gbif_usage_key = data['gbif_usageKey']
             accession = data['accession']
+            tax_id = data['tax_id']
 
             print(f'Working on {i}. {species_name}')
 
@@ -35,10 +36,10 @@ def get_occurrences_gbif(path, limit=150):
                     'MATERIAL_SAMPLE',
                     # 'HUMAN_OBSERVATION',
                     # 'MACHINE_OBSERVATION',
-                    'LIVING_SPECIMEN',
-                    'FOSSIL_SPECIMEN',
-                    'MATERIAL_CITATION',
-                    'OCCURRENCE'
+                    # 'LIVING_SPECIMEN',
+                    # 'FOSSIL_SPECIMEN',
+                    # 'MATERIAL_CITATION',
+                    # 'OCCURRENCE'
                 ],
                 occurrenceStatus='PRESENT',
                 hasCoordinate=True,
@@ -55,6 +56,7 @@ def get_occurrences_gbif(path, limit=150):
                 for record in occurrence_records:
                     record_to_return = {
                         'accession': accession,
+                        'tax_id': tax_id,
                         'gbif_usageKey': record.get('taxonKey', None),
                         'species': record.get('species', None),
                         'decimalLatitude': record.get('decimalLatitude',  None),
@@ -65,24 +67,11 @@ def get_occurrences_gbif(path, limit=150):
                         'continent': record.get('continent', None),
                         'gadm': record.get('gadm', None),
                         'countryCode': record.get('countryCode', None),
-                        # 'country': record.get('gadm').get('level0').get('name', None),
-                        # 'province': record.get('gadm').get('level1').get('name', None),
-                        # 'county': record.get('gadm').get('level2').get('name', None),
-                        # 'municipality': record.get('gadm').get('level3').get('name', None),
                         'basisOfRecord': record.get('basisOfRecord', None),
                         'occurrenceStatus': record.get('occurrenceStatus'),
                         'occurrenceID': record.get('occurrenceID', None),
                         'gbifID': record.get('gbifID', None),
                         'issues': record.get('issues', 'NO_ISSUES_RETRIEVED'),
-                        'kingdom': record.get('kingdom', None),
-                        'phylum': record.get('phylum', None),
-                        'order': record.get('order', None),
-                        'family': record.get('family', None),
-                        'genus': record.get('genus', None),
-                        'scientificName': record.get('scientificName', None),
-                        'acceptedScientificName': record.get('acceptedScientificName', None),
-                        'taxonomicStatus': record.get('taxonomicStatus', None),
-                        # 'identifiedByIDs': record.get('identifiedByIDs', None),
                         'isSequenced': record.get('isSequenced', None),
                         'iucnRedListCategory': record.get('iucnRedListCategory', None)
                     }
