@@ -6,6 +6,11 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "tax_id",
+    "type": "INTEGER"
+  },
+   {
+    "mode": "NULLABLE",
     "name": "species",
     "type": "STRING"
   },
@@ -121,42 +126,12 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "BIOME_NUM",
-    "type": "FLOAT"
-  },
-  {
-    "mode": "NULLABLE",
     "name": "BIOME_NAME",
     "type": "STRING"
   },
   {
     "mode": "NULLABLE",
     "name": "REALM",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "ECO_BIOME_",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "NNH",
-    "type": "FLOAT"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "ECO_ID",
-    "type": "FLOAT"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "NNH_NAME",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "LICENSE",
     "type": "STRING"
   }
 ]
