@@ -53,6 +53,7 @@ WITH
     ARRAY_AGG(STRUCT( spa.species,
         spa.decimalLongitude,
         spa.decimalLatitude,
+        ST_GEOGPOINT(spa.decimalLongitude, spa.decimalLatitude) AS geocoord,
         spa.bio1,
         spa.bio2,
         spa.bio3,
