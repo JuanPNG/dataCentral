@@ -120,3 +120,29 @@ def complement_taxonomy_gnote(path, es_conn):
                 data['genome_note'] = extract_name_gnote_title(x=title)
                 aut.write(f"{json.dumps(data)}\n")
 
+
+def taxonomy_to_load(file_validated_taxonomy, file_taxonomy_upload):
+    """
+    Select fields for taxonomy table in BigQuery.
+    :param file_validated_taxonomy: Path to the JSONL file with GBIF validated taxonomy.
+    :param file_taxonomy_upload: Path to file to upload to BigQuery.
+    :return:
+    """
+    with open(file_taxonomy_upload, 'w') as upload:
+        with open(file_validated_taxonomy, 'r') as tax:
+            for line in tax:
+                data = json.loads(line)
+                spp_taxonomy = {
+                    'accession': data['accession'],
+                    'tax_id': data['tax_id'],
+                    'kingdom': data['kingdom'],
+                    'phylum': data['phylum'],
+                    'class': data['class'],
+                    'order': data['order'],
+                    'family': data['family'],
+                    'genus': data['genus'],
+                    'species': data['species'],
+                    'gbif_scientificName': data['gbif_scientificName'],
+                    'gbif_usageKey': data['gbif_usageKey']
+                }
+                upload.write(f'{json.dumps(spp_taxonomy)}\n')
