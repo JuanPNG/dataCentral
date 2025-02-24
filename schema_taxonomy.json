@@ -1,0 +1,57 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "accession",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "tax_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "gbif_usageKey",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "kingdom",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "phylum",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "class",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "order",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "family",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "genus",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "species",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "gbif_scientificName",
+    "type": "STRING"
+  }
+]
