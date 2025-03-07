@@ -39,7 +39,7 @@ def get_genome_note_title(spp_name, species_portal_data):
                 return title
 
 
-def get_annotation_accessions(index_name, es, size, pages, file_path):
+def get_annotation_accessions(index_name, es, size, pages, file_path=None):
     """
     Get accession numbers, species names, and taxon id for genomes with annotations
     from the Biodiversity Data Portal ElasticSearch database. If a file path is given,
@@ -87,7 +87,7 @@ def get_annotation_accessions(index_name, es, size, pages, file_path):
         if hits:
             after = hits[-1]['sort']
 
-    if file_path:
+    if file_path is not None:
         with open(file_path, 'w') as f:
             for accession in accessions:
                 f.write(f'{json.dumps(accession)}\n')
