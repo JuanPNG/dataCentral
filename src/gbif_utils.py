@@ -205,6 +205,7 @@ def validate_names_gbif(ena_taxonomy_file, validated_file):
 
                         if gbif_record.get('acceptedUsageKey') is not None:
                             data['gbif_acceptedUsageKey'] = gbif_record['acceptedUsageKey']
+                        if gbif_record.get('species') is not None:
                             data['gbif_accepted_species'] = gbif_record['species']
 
                         if gbif_record.get('alternatives') is not None:
