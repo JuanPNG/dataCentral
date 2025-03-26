@@ -3,6 +3,7 @@ SELECT
     gtr.clusterset_id,
     IFNULL(CONCAT(gtr.stable_id, '.', gtr.version), CONCAT('Node_', gtr.root_id)) AS gene_tree_id,
     gm.stable_id AS gene_stable_id,
+    gm.display_label AS gene_name,
     gm.description
 FROM
     gene_tree_root AS gtr
