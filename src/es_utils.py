@@ -77,11 +77,18 @@ def get_annotation_accessions(index_name, es, size, pages, file_path=None):
         hits = data['hits']['hits']
 
         for record in hits:
-            accession = {
-                'accession': record['_source']['annotation'][0]['accession'],
-                'tax_id': record['_source']['tax_id'],
-                'species': record['_source']['annotation'][0]['species']
-            }
+            annotations = record['_source']['annotation']
+            n_annotations = len(annotations)
+            accession = dict()
+
+            if n_annotations == 1:
+                accession['accession'] = annotations[0]['accession']
+                accession['species'] = annotations[0]['species']
+            else:
+                accession['accession'] = annotations[n_annotations - 1]['accession']
+                accession['species'] = annotations[n_annotations - 1]['species']
+
+            accession['tax_id'] = record['_source']['tax_id']
             accessions.append(accession)
 
         if hits:
