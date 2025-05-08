@@ -7,8 +7,6 @@ from apache_beam.transforms.combiners import Top
 from shapely.geometry import Point
 import math
 
-
-# Import your pure filter functions
 # from src.gbif_utils import (
 #     filter_zero_coords,
 #     filter_invalid_coords,
